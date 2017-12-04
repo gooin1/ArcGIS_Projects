@@ -1,5 +1,8 @@
 require(["dojo/_base/declare"], function (declare) {
 
+    /**
+     * 形状类
+     */
     declare("myApp.examples.Shape", // 类名
         null, // 无父类，使用null
         {
@@ -9,6 +12,8 @@ require(["dojo/_base/declare"], function (declare) {
             }
         }
     );
+
+
     // 圆
     declare("myApp.examples.Circle",
         myApp.examples.Shape, // 继承自Shape
@@ -47,5 +52,41 @@ require(["dojo/_base/declare"], function (declare) {
             }
         }
     );
+
+    /**
+     *  位置类
+     */
+    declare("myApp.examples.Position",
+        null,
+        {
+            x: 0,
+            y: 0,
+            constructor: function (x, y) {
+                this.x = x || this.x;
+                this.y = y || this.y;
+            },
+            setPosition: function (x, y) {
+                this.x = x || this.x;
+                this.y = y || this.y;
+            },
+            move: function (x, y) {
+                this.x += x;
+                this.y += y;
+            }
+        }
+    );
+    /**
+     *  使用 Mixin 实现多继承
+     */
+
+    declare("myApp.examples.PositionedCircle",
+        [myApp.examples.Circle, myApp.examples.Position],
+        {
+            constructor: function (radius, x, y) {
+                this.setPosition(x, y)
+            }
+        }
+    );
+
 
 });

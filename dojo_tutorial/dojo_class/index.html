@@ -19,6 +19,18 @@
         var circle = new myApp.examples.Circle(5);
         console.log(circle.area()); //out put 78.53981633974483
 
+        // 测试多继承
+        var pc = new myApp.examples.PositionedCircle(5, 20, 20);
+        console.log(pc); // Object
+        console.log(pc.color); //0
+        pc.setColor(255);
+        console.log(pc.color); //255
+        console.log(pc.area());  // 78.53..
+        console.log([pc.x, pc.y]); // [20,20]
+        pc.setPosition(999, 999);
+        console.log([pc.x, pc.y]);// [999,999]
+
+
     </script>
 </head>
 <body class="tundra">
