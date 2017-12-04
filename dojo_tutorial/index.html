@@ -6,16 +6,24 @@
     <script src="https://arcgis.happygis.com/"></script>
     <script type="text/javascript" src="DeclareClass.js"></script>
     <script>
-        var s = new myApp.example.Shape();
+
+        var s = new myApp.examples.Shape();
         console.log(s.color); //  out put 0
         s.setColor(0x0000ff);
         console.log(s.color);// out put 255
+
+        var rectangle = new myApp.examples.Rectangle(3, 2);
+        console.log(rectangle.area()); // out put 6
+        //
+
+        var circle = new myApp.examples.Circle(5);
+        console.log(circle.area()); //out put 78.53981633974483
 
     </script>
 </head>
 <body class="tundra">
 <p>
-   dojo 学习
+    dojo 学习
 </p>
 </body>
 </html>
