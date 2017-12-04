@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <file url="PROJECT" libraries="{ArcGIS_Projects, arcgis-js-api.d.ts, dojo}" />
+  </component>
+</project>

@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="ArcGIS_Projects" type="javaScript">
+    <properties>
+      <option name="frameworkName" value="Dojo" />
+      <option name="frameworkVersion" value="" />
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$" />
+    </CLASSES>
+    <DOCUMENTATION>
+      <root url="http://dojotoolkit.org/api" />
+    </DOCUMENTATION>
+    <SOURCES />
+  </library>
+</component>
