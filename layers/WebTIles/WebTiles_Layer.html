@@ -3,8 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>WebTileLayer - 4.5</title>
-
+    <title>WebTileLayer</title>
     <style>
         html,
         body,
@@ -28,9 +27,9 @@
             "esri/layers/support/TileInfo",
             "esri/geometry/SpatialReference",
             "dojo/dom",
-            "dojo/domReady!layers/WebTIles/WebTiles_Layer"
+            "dojo/domReady!"
         ], function (esriConfig, WebTileLayer, Map, SceneView, SpatialReference, TileInfo, dom) {
-
+            // 允许跨域访问天地图域名
             esriConfig.request.corsEnabledServers
                 .push(
                     "t0.tianditu.com",
@@ -75,19 +74,18 @@
              *  http://{subDomain}.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}
              */
 
-
+                //添加天地图矢量图层
             var tiandiVecLayer = new WebTileLayer({
-
-                urlTemplate: "http://{subDomain}.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}",
-                subDomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
-                copyright: "天地图影像"
-            });
+                    urlTemplate: "http://{subDomain}.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}",
+                    subDomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
+                    copyright: "天地图"
+                });
 //
 //            console.log("SceneView空间参考:");
 //            console.log(map.spatialReference);
 //            console.log("天地图空间参考: ");
 //            console.log(tiandiVecLayer.spatialReference);
-
+            //添加天地图矢量注记图层
             var tiandiVecLabelLayer = new WebTileLayer({
 //                tileInfo: tileInfo,
                 urlTemplate: "http://{subDomain}.tianditu.com/DataServer?T=cva_w&x={col}&y={row}&l={level}",
@@ -97,7 +95,7 @@
             });
             // 将两个图层添加到地图中
             map.addMany([tiandiVecLayer, tiandiVecLabelLayer]);
-
+            //添加点击事件
             view.on("click", function (event) {
                 event.stopPropagation();
 //              获取点击点的经纬度
