@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>WebTileLayer - 4.5</title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://arcgis.happygis.com/esri/css/main.css">
+    <script src="https://arcgis.happygis.com/"></script>
+
+    <script>
+        require([
+            "esri/config",
+            "esri/layers/WebTileLayer",
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/layers/support/TileInfo",
+            "esri/geometry/SpatialReference",
+            "dojo/dom",
+            "dojo/domReady!layers/WebTIles/WebTiles_Layer"
+        ], function (esriConfig, WebTileLayer, Map, SceneView, SpatialReference, TileInfo, dom) {
+
+            esriConfig.request.corsEnabledServers
+                .push(
+                    "t0.tianditu.com",
+                    "t1.tianditu.com",
+                    "t2.tianditu.com",
+                    "t3.tianditu.com",
+                    "t4.tianditu.com",
+                    "t5.tianditu.com",
+                    "t6.tianditu.com",
+                    "t7.tianditu.com"
+                );
+            var map = new Map({
+                ground: "world-elevation"
+            });
+
+
+            // TODO: 修正不同坐标系统空间参考
+            var view = new SceneView({
+                container: "viewDiv",
+                map: map,
+                scale: 5000,
+                //  Center in Google Map
+//                center: [114.390395, 30.461266]
+                // Center in GaoDe Map
+//                center: [114.396963, 30.467265]
+                // Center in Tianditu
+                center: [114.38484, 30.46359]
+            });
+
+
+            /**
+             * 天地图URL参数
+             *
+             *  // 影像图层
+             *  http://{subDomain}.tianditu.com/DataServer?T=img_w&x={col}&y={row}&l={level}
+             *  // 影像注记
+             *  http://{subDomain}.tianditu.com/DataServer?T=cia_w&x={col}&y={row}&l={level}
+             *
+             *  // 矢量注记
+             *  http://{subDomain}.tianditu.com/DataServer?T=cva_w&x={col}&y={row}&l={level}
+             *  // 矢量图层
+             *  http://{subDomain}.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}
+             */
+
+
+            var tiandiVecLayer = new WebTileLayer({
+
+                urlTemplate: "http://{subDomain}.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}",
+                subDomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
+                copyright: "天地图影像"
+            });
+//
+//            console.log("SceneView空间参考:");
+//            console.log(map.spatialReference);
+//            console.log("天地图空间参考: ");
+//            console.log(tiandiVecLayer.spatialReference);
+
+            var tiandiVecLabelLayer = new WebTileLayer({
+//                tileInfo: tileInfo,
+                urlTemplate: "http://{subDomain}.tianditu.com/DataServer?T=cva_w&x={col}&y={row}&l={level}",
+                subDomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
+
+
+            });
+            // 将两个图层添加到地图中
+            map.addMany([tiandiVecLayer, tiandiVecLabelLayer]);
+
+            view.on("click", function (event) {
+                event.stopPropagation();
+//              获取点击点的经纬度
+                var lat = event.mapPoint.latitude;
+                var lon = event.mapPoint.longitude;
+                // 弹出提醒
+                view.popup.open({
+                    title: "经纬度: ",
+                    location: event.mapPoint,
+                    content: "[" + lon + "," + lat + "]"
+                });
+            });
+
+
+        });
+    </script>
+</head>
+
+<body>
+<div id="viewDiv"></div>
+</body>
+
+</html>
