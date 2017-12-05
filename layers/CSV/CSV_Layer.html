@@ -1,7 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>CSVLayer</title>
 
-### CSV Layer 效果
-```javascript
-// CSV 资源的 URL
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://arcgis.happygis.com/esri/css/main.css">
+    <script src="https://arcgis.happygis.com/"></script>
+
+    <script>
+        require([
+            "esri/Map",
+            "esri/layers/CSVLayer",
+            "esri/views/SceneView",
+            "esri/renderers/SimpleRenderer",
+            "esri/symbols/PointSymbol3D",
+            "esri/symbols/IconSymbol3DLayer",
+            "esri/config",
+            "esri/core/urlUtils",
+            "dojo/domReady!layers/CSV/CSV_Layer"
+        ], function (Map,
+                     CSVLayer,
+                     SceneView,
+                     SimpleRenderer,
+                     PointSymbol3D,
+                     IconSymbol3DLayer,
+                     esriConfig,
+                     urlUtils) {
+
+            // CSV 资源的 URL
             var url = "https://arcgis.happygis.com/demos/4.5/layers/resources/ingress.csv";
             //
             esriConfig.request.corsEnabledServers.push(url);
@@ -53,18 +91,13 @@
                 zoom: 4,
                 map: map
             });
-```
-ingress.csv 文件内容
-```
-time,latitude,longitude,faction,owner_name,portal_name
-2017/9/7 21:13,35.591436,104.692154,blue,gooin,正立广场
-2017/9/5 18:20,20,60,blue,xxx,test1
-2017/4/7 21:20,-20,30,green,adasd,fafa
-2017/9/7 21:13,26,12.692154,blue,gooin,一个狮子
-2017/9/7 21:13,103,35,blue,gooin,一个po名
-2017/9/7 21:13,104,25,blue,sb,哇啦哇啦哇累
-```
-演示地址
-https://arcgis.happygis.com/demos/4.5/layers/CSV_Layer.html
 
-![CSV Layer](https://i.loli.net/2017/12/05/5a26168a802b9.png)
+        });
+    </script>
+</head>
+
+<body>
+<div id="viewDiv"></div>
+</body>
+
+</html>
