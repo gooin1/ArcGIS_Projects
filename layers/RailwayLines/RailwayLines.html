@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>WebTileLayer</title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://api.happygis.com/4.5/esri/css/main.css">
+    <script src="https://api.happygis.com/4.5/"></script>
+
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/getRailwayStationInfo.js"></script>
+
+    <script>
+        require([
+            "esri/config",
+            "esri/layers/WebTileLayer",
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/layers/support/TileInfo",
+            "esri/geometry/SpatialReference",
+            "dojo/dom",
+            "dojo/domReady!"
+        ], function (esriConfig, WebTileLayer, Map, SceneView, SpatialReference, TileInfo, dom) {
+            // 允许跨域访问天地图域名
+            esriConfig.request.corsEnabledServers
+                .push(
+                    "t0.tianditu.com",
+                    "t1.tianditu.com",
+                    "t2.tianditu.com",
+                    "t3.tianditu.com",
+                    "t4.tianditu.com",
+                    "t5.tianditu.com",
+                    "t6.tianditu.com",
+                    "t7.tianditu.com"
+                );
+            var map = new Map({
+                ground: "world-elevation"
+            });
+
+
+            // TODO: 修正不同坐标系统空间参考
+            var view = new SceneView({
+                container: "viewDiv",
+                map: map,
+                scale: 50000,
+                center: [103, 36]
+            });
+
+
+            /**
+             * 天地图URL参数
+             *
+             *  // 影像图层
+             *  http://{subDomain}.tianditu.com/DataServer?T=img_w&x={col}&y={row}&l={level}
+             *  // 影像注记
+             *  http://{subDomain}.tianditu.com/DataServer?T=cia_w&x={col}&y={row}&l={level}
+             *
+             *  // 矢量注记
+             *  http://{subDomain}.tianditu.com/DataServer?T=cva_w&x={col}&y={row}&l={level}
+             *  // 矢量图层
+             *  http://{subDomain}.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}
+             */
+
+                //添加天地图矢量图层
+            var tiandiVecLayer = new WebTileLayer({
+                    urlTemplate: "https://{subDomain}.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}",
+                    subDomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"],
+                    copyright: "天地图"
+                });
+            //添加天地图矢量注记图层
+            var tiandiVecLabelLayer = new WebTileLayer({
+//                tileInfo: tileInfo,
+                urlTemplate: "http://{subDomain}.tianditu.com/DataServer?T=cva_w&x={col}&y={row}&l={level}",
+                subDomains: ["t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"]
+
+
+            });
+            // 将两个图层添加到地图中
+            map.addMany([tiandiVecLayer, tiandiVecLabelLayer]);
+            //添加点击事件
+            view.on("click", function (event) {
+                event.stopPropagation();
+//              获取点击点的经纬度
+                var lat = event.mapPoint.latitude;
+                var lon = event.mapPoint.longitude;
+                // 弹出提醒
+                view.popup.open({
+                    title: "经纬度: ",
+                    location: event.mapPoint,
+                    content: "[" + lon + "," + lat + "]"
+                });
+            });
+
+
+        });
+    </script>
+</head>
+
+<body>
+<div id="viewDiv"></div>
+</body>
+
+</html>
