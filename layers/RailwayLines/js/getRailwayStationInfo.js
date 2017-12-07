@@ -59,6 +59,6 @@ var queryResult = {
     info: lanXinRailWay.info,
     stations:tempData
 };
-
 console.log(queryResult);
+
 
