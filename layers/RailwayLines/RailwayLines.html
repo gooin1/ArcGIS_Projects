@@ -92,7 +92,7 @@
             var view = new SceneView({
                 container: "viewDiv",
                 map: map,
-                zoom: 10,
+                zoom: 7,
                 center: [103.80488194882626, 36.058569101257554]
             });
             /**
@@ -145,7 +145,12 @@
                     name: "station_name",
                     alias: "station_name",
                     type: "string"
-                }];
+                },{
+                    name: "station_info",
+                    alias: "station_info",
+                    type: "string"
+                }
+            ];
 
             var pointRenderer = new SimpleRenderer({
                 symbol: new SimpleMarkerSymbol({
@@ -162,7 +167,7 @@
             // Set up popup template for the layer
             var stationTemplate = {
                 title: "{station_name}",
-                content: "{station_name}"
+                content: "{station_info}" + "{station_name}"
             };
 
 
@@ -191,7 +196,8 @@
                             geometry: point,
                             attributes: {
                                 ObjectID: i,
-                                station_name: feature.name
+                                station_name: feature.name,
+                                station_info: feature.info
                             }
                         };
                     /**
