@@ -17,9 +17,9 @@
 
     <link rel="stylesheet" href="https://api.happygis.com/4.5/esri/css/main.css">
     <script src="https://api.happygis.com/4.5/"></script>
-
     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/coordtransform.js"></script>
     <script src="js/getRailwayStationInfo.js"></script>
 
     <script>
@@ -229,7 +229,7 @@
                     objectIdField: "ObjectID",
                     geometryType: "point"
                 });
-                console.log(lyr);
+//                console.log(lyr);
                 map.add(lyr);
             }
 

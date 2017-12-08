@@ -86,26 +86,35 @@ function getDatafromAPI(queryURL) {
                 var locationArray = location.split(",");
                 var lng = locationArray[0];
                 var lat = locationArray[1];
+                // var wgs84 = gcj02towgs84(lng,lat);
+                // 将高德返回的GCJ02坐标转换为WGS84
+                var wgs84 = coordtransform.gcj02towgs84(lng,lat);
+                console.log(lng);
+                console.log(lat);
+                console.log(wgs84);
                 var object = {
                     "name": value,
                     "info": data.geocodes[0].formatted_address,
                     "location": {
-                        "lng": lng,
-                        "lat": lat,
+                        "lng": wgs84[0],
+                        "lat": wgs84[1],
                     }
-                }
+                };
             }
             // 解析百度API返回的json
             if (isBaiduURL) {
                 var lng = data.result.location.lng;
                 var lat = data.result.location.lat;
+                var gcj02 = coordtransform.bd09togcj02(lng,lat)
+                var wgs84 = coordtransform.gcj02towgs84(gcj02[0],gcj02[1])
                 var object = {
                     "name": value,
                     "location": {
-                        "lng": lng,
-                        "lat": lat,
+                        "lng": wgs84[0],
+                        "lat": wgs84[1],
                     }
                 }
+
             }
             tempData.push(object);
         });
@@ -115,9 +124,12 @@ function getDatafromAPI(queryURL) {
         info: lanXinRailWay.info,
         stations: tempData
     };
+    console.log(queryResult);
     return queryResult;
+
 }
-getDatafromAPI(gaodeQueryURL);
+// getDatafromAPI(gaodeQueryURL);
+getDatafromAPI(baiduQueryURL);
 
 
 
