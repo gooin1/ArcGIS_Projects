@@ -1,5 +1,5 @@
 /***
- *  从百度API获取车站的经纬度
+ *  从 百度/高德 API 获取车站的经纬度
  * @type {{info: string, stations: [string,string,string,string,string]}}
  */
 
@@ -27,38 +27,97 @@ var lanXinRailWay = {
 //         "level": "火车站"
 // }
 
-var baiduQueryURL = "https://api.map.baidu.com/geocoder/v2/?output=json&ak=" + baiduAPI + "&address=";
-var tempData = [];
+// 高德API返回数据
+// {
+//     "status": "1",
+//     "info": "OK",
+//     "infocode": "10000",
+//     "count": "1",
+//     "geocodes": [
+//     {
+//         "formatted_address": "甘肃省兰州市七里河区兰州西站",
+//         "province": "甘肃省",
+//         "citycode": "0931",
+//         "city": "兰州市",
+//         "district": "七里河区",
+//         "township": [],
+//         "neighborhood": {
+//             "name": [],
+//             "type": []
+//         },
+//         "building": {
+//             "name": [],
+//             "type": []
+//         },
+//         "adcode": "620103",
+//         "street": [],
+//         "number": [],
+//         "location": "103.752739,36.068391",
+//         "level": "兴趣点"
+//     }
+// ]
+// }
 
-$.each(lanXinRailWay.stations, function (index, value) {
-    // console.log(value);
-    // var baiduQueryURL = "https://api.map.baidu.com/geocoder/v2/?address=" + lanXinRailWay.stations[0] + "&output=json&ak=" + baiduAPI;
-    // var tempData = [];
-    $.ajax({
-        dataType: "jsonp",
-        type: "GET",
-        async: false,
-        url: baiduQueryURL + value,
-    }).done(function (data) {
-        var lng = data.result.location.lng;
-        var lat = data.result.location.lat;
-        var object = {
-            "name": value,
-            "location":{
-                "lng": lng,
-                "lat": lat,
+var gaodeQueryURL = "https://restapi.amap.com/v3/geocode/geo?key=" + gaodeAPIKey + "&address=";
+var baiduQueryURL = "https://api.map.baidu.com/geocoder/v2/?output=json&ak=" + baiduAPIKey + "&address=";
+
+/***
+ * 从高德,百度地理编码API获取数据
+ * @param queryURL 地理编码API的URL
+ * @returns {{info: string, stations: Array}|*}
+ */
+function getDatafromAPI(queryURL) {
+    var tempData = [];
+    var urlArray = queryURL.split(".")
+    // 从传入的URL判断是否为高德API及百度API
+    var isGaodeURL = urlArray.includes('amap');
+    var isBaiduURL = urlArray.includes('baidu');
+    $.each(lanXinRailWay.stations, function (index, value) {
+        // API获取查询结果
+        $.ajax({
+            dataType: "jsonp",
+            type: "GET",
+            async: false,
+            url: queryURL + value,
+        }).done(function (data) {
+            // 解析高德API返回的json
+            if (isGaodeURL) {
+                var location = data.geocodes[0].location;
+                var locationArray = location.split(",");
+                var lng = locationArray[0];
+                var lat = locationArray[1];
+                var object = {
+                    "name": value,
+                    "info": data.geocodes[0].formatted_address,
+                    "location": {
+                        "lng": lng,
+                        "lat": lat,
+                    }
+                }
             }
-        }
-        tempData.push(object);
-        // console.log(object);
+            // 解析百度API返回的json
+            if (isBaiduURL) {
+                var lng = data.result.location.lng;
+                var lat = data.result.location.lat;
+                var object = {
+                    "name": value,
+                    "location": {
+                        "lng": lng,
+                        "lat": lat,
+                    }
+                }
+            }
+            tempData.push(object);
+        });
     });
-});
+    // 组装带有经纬度的数据
+    queryResult = {
+        info: lanXinRailWay.info,
+        stations: tempData
+    };
+    return queryResult;
+}
+getDatafromAPI(gaodeQueryURL);
 
-// 组装带有经纬度的数据
-var queryResult = {
-    info: lanXinRailWay.info,
-    stations:tempData
-};
-console.log(queryResult);
 
 
