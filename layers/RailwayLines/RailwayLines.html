@@ -150,20 +150,19 @@
             var pointRenderer = new SimpleRenderer({
                 symbol: new SimpleMarkerSymbol({
                     style: "circle",
-                    size: 25,
-                    color: "#179",
+                    size: 15,
+                    color: "#24d6d7",
                     outline: {
                         width: 2,
-                        color: "#FF4055",
+                        color: "#7f99ff",
                         style: "solid"
                     }
                 })
             });
             // Set up popup template for the layer
             var stationTemplate = {
-//                title: "{station_name}",
-                title: "我是NAME",
-                content: "我是CONTENT"
+                title: "{station_name}",
+                content: "{station_name}"
             };
 
 
@@ -209,7 +208,6 @@
                 });
             }
 
-//            console.log(features);
             var lyr;
 
             /***
@@ -218,7 +216,7 @@
              * @returns {*}
              */
 
-            //TODO: popup 无法弹出, 即点击图上的点没有弹出属性框
+            //TODO: fixed! popupTemplate 的单词写错了! 傻逼!!  popup 无法弹出, 即点击图上的点没有弹出属性框
             //TODO: 百度地图api返回的经纬度有误差,需要修复
             function createStationLayer() {
                 lyr = new FeatureLayer({
@@ -226,18 +224,15 @@
                     source: features,
                     fields: fields,
                     renderer: pointRenderer,
-                    popupTemple: stationTemplate,
+                    // popupTemplate 单词别错了
+                    popupTemplate: stationTemplate,
                     objectIdField: "ObjectID",
                     geometryType: "point"
                 });
+                console.log(lyr);
                 map.add(lyr);
-//                return lyr;
             }
 
-//            view.then(function(){
-//                createStationGraphicPoint()
-//                    .then(createStationLayer)
-//            });
             createStationGraphicPoint();
             createStationLayer();
 
