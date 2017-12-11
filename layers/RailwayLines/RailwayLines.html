@@ -145,25 +145,25 @@
                     name: "station_name",
                     alias: "station_name",
                     type: "string"
-                },{
+                }, {
                     name: "station_info",
                     alias: "station_info",
                     type: "string"
                 }
             ];
 
+            // 设置点符号样式
+            var picture_symbol = {
+                type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+                url: "https://api.happygis.com/demos/layers/resources/images/railway_station1.png",
+                width: "30px",
+                height: "30px"
+            };
+            // 对点符号进行渲染
             var pointRenderer = new SimpleRenderer({
-                symbol: new SimpleMarkerSymbol({
-                    style: "circle",
-                    size: 15,
-                    color: "#24d6d7",
-                    outline: {
-                        width: 2,
-                        color: "#7f99ff",
-                        style: "solid"
-                    }
-                })
+                symbol: picture_symbol
             });
+
             // Set up popup template for the layer
             var stationTemplate = {
                 title: "{station_name}",
@@ -222,8 +222,6 @@
              * @returns {*}
              */
 
-            //TODO: fixed! popupTemplate 的单词写错了! 傻逼!!  popup 无法弹出, 即点击图上的点没有弹出属性框
-            //TODO: 百度地图api返回的经纬度有误差,需要修复
             function createStationLayer() {
                 lyr = new FeatureLayer({
                     // 上个函数中的graphics
