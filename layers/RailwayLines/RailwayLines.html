@@ -160,9 +160,11 @@
                 height: "30px"
             };
             // 对点符号进行渲染
-            var pointRenderer = new SimpleRenderer({
+            var pointRenderer = {
+                type: "simple",
                 symbol: picture_symbol
-            });
+            };
+
 
             // Set up popup template for the layer
             var stationTemplate = {

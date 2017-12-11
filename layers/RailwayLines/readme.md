@@ -53,3 +53,46 @@
 `清水北站` -> `酒泉清水北站`;
 
 ![](https://wx1.sinaimg.cn/large/6d4d992ely1fm9h00sma8j21h40tzkc1.jpg)
+
+### 设置点符号样式
+现在的点样式为一个圆圈, 没有样式, 不能一眼认出这就是火车站, 就需要设置点符号为火车站的样式.
+查阅API, 发现 `PictureMarkerSymbol` 可以完成需求.
+
+原来的点渲染代码
+```js
+// 对点符号进行渲染
+             var pointRenderer = new SimpleRenderer({
+             symbol: new SimpleMarkerSymbol({
+                    style: "circle",
+                    size: 15,
+                    color: "#24d6d7",
+                    outline: {
+                        width: 2,
+                        color: "#7f99ff",
+                        style: "solid"
+                    }
+               })
+             });
+```
+将 `symbol`修改为 `PictureMarkerSymbol` 即可
+
+> 需要注意的是, 在 `ArcGIS API For JS 4.5` 版本中, `autocasting` 方法支持所有 `Renders`, `symbols` 以及 `symbol layers`.
+这样就不用在 `require` 和 `define` 中去写用到的方法了, 省事很多.
+
+```js
+// 设置点符号样式
+            var picture_symbol = {
+                type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+                url: "https://api.happygis.com/demos/layers/resources/images/railway_station1.png",
+                width: "30px",
+                height: "30px"
+            };
+            // 对点符号进行渲染
+            var pointRenderer = {
+                type: "simple", // 使用 autocast 方法作为 new SimpleRender()
+                symbol: picture_symbol
+            };
+```
+效果:
+
+![image](https://wx3.sinaimg.cn/large/6d4d992ely1fmclknzpo2j20hs0ejgq4.jpg)
