@@ -21,6 +21,8 @@
     <script src="js/config.js"></script>
     <script src="js/coordtransform.js"></script>
     <script src="js/getRailwayStationInfo.js"></script>
+    <script src="js/stationsInfo.js"></script>
+
 
     <script>
         require([
@@ -92,7 +94,7 @@
             var view = new SceneView({
                 container: "viewDiv",
                 map: map,
-                zoom: 7,
+                zoom: 5,
                 center: [103.80488194882626, 36.058569101257554]
             });
             /**
@@ -136,6 +138,11 @@
 //                });
 //            });
 
+            /****************************************************************************/
+            /*****************************高铁站点*****************************************/
+            /****************************************************************************/
+
+            // 设置车站字段属性
             var fields = [
                 {
                     name: "ObjectID",
@@ -152,10 +159,11 @@
                 }
             ];
 
+
             // 设置点符号样式
             var picture_symbol = {
                 type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
-                url: "https://api.happygis.com/demos/layers/resources/images/railway_station1.png",
+                url: "https://api.happygis.com/demos/layers/resources/images/railway_station.png",
                 width: "30px",
                 height: "30px"
             };
@@ -165,69 +173,102 @@
                 symbol: picture_symbol
             };
 
-
             // Set up popup template for the layer
             var stationTemplate = {
                 title: "{station_name}",
                 content: "{station_info}" + "{station_name}"
             };
 
-
-            var features = [];
-
             /**
              * 创建点的 graphics
              *  queryResult 为getRailwayStationInfo.js 中获取的信息
              *
              */
-            function createStationGraphicPoint() {
-//                遍历stations 读取数据
-                return arrayUtils.map(queryResult.stations, function (feature, i) {
-//                    创建一个对象用于保存每个点的信息, 每次循环清空
+            var stationFeatures = [];
 
-                    var graphics = {};
-                    // 创建点对象
-                    var point = new Point({
-                        x: feature.location.lng,
-                        y: feature.location.lat
-                    });
+//            function createStationGraphicPoint() {
+////                遍历stations 读取数据
+//                return arrayUtils.map(queryResult.stations, function (feature, i) {
+////                    创建一个对象用于保存每个点的信息, 每次循环清空
+//                    var graphics = {};
+//                    // 创建点对象
+//                    var point = new Point({
+//                        x: feature.location.lng,
+//                        y: feature.location.lat
+//                    });
+////                    console.log(point);
+////                    将点的数据存入graphics中
+//                    graphics =
+//                        {
+//                            geometry: point,
+//                            attributes: {
+//                                ObjectID: i,
+//                                station_name: feature.name,
+//                                station_info: feature.info
+//                            }
+//                        };
+//                    /**
+//                     * 此处有坑
+//                     * 在创建 FeatureLayer的时候,  source 中需要传入一个**数组**
+//                     *  Once those properties are specified, the array of graphics must be set to the source property
+//                     * 官方文档: https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#source
+//                     *
+//                     */
+////                    将graphics对象保存到数组中
+//                    stationFeatures.push(graphics);
+//                });
+//            }
+
+            function createStationGraphicPoint() {
+                // 遍历中国铁路站点
+                $.each(railwayStationsChina.railways, function (index, railwayLine) {
+                    return arrayUtils.map(railwayLine.stations, function (feature, i) {
+//                    创建一个对象用于保存每个点的信息, 每次循环清空
+                        var graphics = {};
+                        // 创建点对象
+                        var point = new Point({
+                            x: feature.location.lng,
+                            y: feature.location.lat
+                        });
 //                    console.log(point);
 //                    将点的数据存入graphics中
-                    graphics =
-                        {
-                            geometry: point,
-                            attributes: {
-                                ObjectID: i,
-                                station_name: feature.name,
-                                station_info: feature.info
-                            }
-                        };
-                    /**
-                     * 此处有坑
-                     * 在创建 FeatureLayer的时候,  source 中需要传入一个**数组**
-                     *  Once those properties are specified, the array of graphics must be set to the source property
-                     * 官方文档: https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#source
-                     *
-                     */
+                        graphics =
+                            {
+                                geometry: point,
+                                attributes: {
+                                    ObjectID: railwayLine.id + i,
+                                    station_name: feature.name,
+                                    station_info: feature.info
+                                }
+                            };
+                        /**
+                         * 此处有坑
+                         * 在创建 FeatureLayer的时候,  source 中需要传入一个**数组**
+                         *  Once those properties are specified, the array of graphics must be set to the source property
+                         * 官方文档: https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html#source
+                         *
+                         */
 
 //                    将graphics对象保存到数组中
-                    features.push(graphics);
+//                    console.log(stationFeatures);
+                        stationFeatures.push(graphics);
 
+                    });
                 });
             }
 
-            var lyr;
 
             /***
              * 创建火车站点图层
              *
              * @returns {*}
              */
+            var station_lyr;
 
             function createStationLayer() {
-                lyr = new FeatureLayer({
+                station_lyr = new FeatureLayer({
                     // 上个函数中的graphics
-                    source: features,
+                    source: stationFeatures,
                     fields: fields,
                     renderer: pointRenderer,
                     // popupTemplate 单词别错了
@@ -235,12 +276,171 @@
                     objectIdField: "ObjectID",
                     geometryType: "point"
                 });
-//                console.log(lyr);
-                map.add(lyr);
+                console.log(station_lyr);
+                map.add(station_lyr);
+            }
+
+            /*******************************************************************************/
+            /********************************铁路线****************************************/
+            /*******************************************************************************/
+
+//            铁路线符号样式
+            var railway_line_symbol = {
+                type: "simple-line",
+                style: "short-dash-dot",
+                join: "bevel",
+                miterLimit: 0,
+                width: 4,
+                color: [92, 92, 92, 1]
+            };
+
+
+//            铁路符号渲染
+            var railwayRender = {
+                type: "simple",
+                symbol: railway_line_symbol,
+
+                // 可视变量
+                visualVariables: [
+                    {
+                        // 按颜色进行分类
+                        type: "color",
+                        // 选择要进行分类的字段
+                        field: "railway_level",
+                        // 根据字段值进行划分
+                        stops: [
+                            {value: 250, color: "#edcc50"},
+                            {value: 300, color: "#ea6838"},
+                            {value: 350, color: "#e51806"}
+                        ]
+                    }
+                ]
+            };
+
+            // 铁路属性字段
+            var railwayFields = [
+                {
+                    name: "ObjectID",
+                    alias: "ObjectID",
+                    type: "oid"
+                }, {
+                    name: "railway_name",
+                    alias: "railway_name",
+                    type: "string"
+                }, {
+                    name: "railway_info",
+                    alias: "railway_info",
+                    type: "string"
+                }, {
+                    name: "railway_level",
+                    alias: "railway_level",
+                    type: "string"
+                }
+            ];
+
+            var railwayLineTemplate = {
+                title: "{railway_name}",
+                content: "{railway_info}"
+            };
+
+            console.log(railwayRender);
+
+
+            /**
+             * 创建铁路的 graphics
+             *  queryResult 为getRailwayStationInfo.js 中获取的信息
+             *
+             */
+            var lineFeatures = [];
+            var railwayPath = [];
+
+//            function createRailwayGraphicLine() {
+////                遍历stations 读取数据
+//                arrayUtils.map(queryResult.stations, function (feature, i) {
+//                    var lineGraphics = {};
+//                    // 创建线对象
+//                    railwayPath.push([feature.location.lng, feature.location.lat]);
+////                    console.log(i)
+//                });
+//                var railwayLine = new Polyline({
+//                    hasZ: false,
+//                    hasM: false,
+//                    paths: railwayPath,
+//                    spatialReference: {wkid: 4326}
+//                });
+//
+//                var lineGraphics =
+//                    {
+//                        geometry: railwayLine,
+//                        attributes: {
+//                            ObjectID: 0,
+//                            railway_info: queryResult.info
+//                        }
+//                    };
+//                lineFeatures.push(lineGraphics);
+////                console.log(lineGraphics);
+//                console.log(lineFeatures);
+//                return lineFeatures;
+//            }
+
+            function createRailwayGraphicLine() {
+//                遍历 所有的中国高铁线 读取数据
+                $.each(railwayStationsChina.railways, function (index, railway) {
+                    var railwayPath = [];
+//               遍历stations 读取数据
+                    arrayUtils.map(railway.stations, function (feature, i) {
+                        var lineGraphics = {};
+                        // 创建线对象
+                        railwayPath.push([feature.location.lng, feature.location.lat]);
+//                    console.log(i)
+                    });
+                    var railwayLine = new Polyline({
+                        hasZ: false,
+                        hasM: false,
+                        paths: railwayPath,
+                        spatialReference: {wkid: 4326}
+                    });
+
+                    var lineGraphics =
+                        {
+                            geometry: railwayLine,
+                            attributes: {
+                                ObjectID: railway.id * 10,
+                                railway_name: railway.name,
+                                railway_info: railway.info,
+                                railway_level: railway.level,
+                                railway_url: railway.url
+                            }
+                        };
+                    lineFeatures.push(lineGraphics);
+//                    console.log(lineFeatures);
+                    return lineFeatures;
+                });
+            }
+
+
+        // 创建铁路图层
+            var railway_lyr;
+            function createRailwayLayer() {
+                railway_lyr = new FeatureLayer({
+                    // 上个函数中的graphics
+                    source: lineFeatures,
+                    fields: railwayFields,
+                    renderer: railwayRender,
+//                    目前 polyline好像不支持 popup
+//                    popupTemplate: railwayLineTemplate,
+                    objectIdField: "ObjectID",
+                    geometryType: "polyline"
+                });
+                console.log(railway_lyr);
+                map.add(railway_lyr);
             }
 
             createStationGraphicPoint();
+            createRailwayGraphicLine();
             createStationLayer();
+            createRailwayLayer();
+
 
         });
     </script>

@@ -83,7 +83,7 @@
 // 设置点符号样式
             var picture_symbol = {
                 type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
-                url: "https://api.happygis.com/demos/layers/resources/images/railway_station1.png",
+                url: "https://api.happygis.com/demos/layers/resources/images/railway_station.png",
                 width: "30px",
                 height: "30px"
             };
@@ -96,3 +96,227 @@
 效果:
 
 ![image](https://wx3.sinaimg.cn/large/6d4d992ely1fmclknzpo2j20hs0ejgq4.jpg)
+
+### 将点连接成线, 组成基本的铁路线
+现在有了一部分点, 所有要将这些点组合, 连接成线, 组成基本的高铁线, 真正的高铁线不会在两个站点之间是一条直线的, 所以这就是一个大坑了, 需要后期解决
+
+创建线的思路和创建点的思路一样:
+
+> 创建 Graphics
+
+> 创建图层
+
+
+我将通过API查询到的每个高铁站的点保存到本地的JSON中, 方便调用
+
+`railwayStationsChina` 就是存储的全国的高铁站点信息
+
+```javascript
+
+var railwayStationsChina = {
+    "railways": [
+        {
+            "name": "兰新高铁",
+            "id": 1500,
+            "level": 250,
+            "info": "兰新铁路第二双线，简称兰新二双，又称兰新高铁、兰...",
+            "stations":
+            [
+                 {
+                     "name": "兰州西高铁站",
+                     "info": "甘肃省兰州市七里河区",
+                     "location": {
+                         "lng": 103.75094571814675,
+                         "lat": 36.070940100316214
+                     }
+                 },
+                 {
+                     "name": "民和南站",
+                     "info": "青海省海东地区民和回族土族自治县",
+                     "location": {
+                         "lng": 102.84816685586642,
+                         "lat": 36.30648357548181
+                     }
+                 },
+                 .....
+
+            ]
+        },{
+             "name": "xx高铁",
+             "id": 1500,
+             "level": 250,
+             "info": "xxxxx高铁 xxx年 建成xxx.",
+             "stations":
+             [
+                  {
+                      "name": "xx站",
+                      "info": "xxxx区",
+                      "location": {
+                          "lng": 103.75094571814675,
+                          "lat": 36.070940100316214
+                      }
+                  },
+                  {
+                      "name": "xx站",
+                      "info": "xxxx区",
+                      "location": {
+                          "lng": 102.84816685586642,
+                          "lat": 36.30648357548181
+                      }
+                  },
+                  .....
+
+             ]
+          },
+          ....
+        ]
+    }
+```
+
+#### 创建Graphic
+
+```javascript
+var lineFeatures = [];
+var railwayPath = [];
+          function createRailwayGraphicLine() {
+//                遍历 所有的中国高铁线 读取数据
+                $.each(railwayStationsChina.railways, function (index, railway) {
+                    var railwayPath = [];
+                    arrayUtils.map(railway.stations, function (feature, i) {
+                        var lineGraphics = {};
+                        // 创建线对象
+                        railwayPath.push([feature.location.lng, feature.location.lat]);
+//                    console.log(i)
+                    });
+                    var railwayLine = new Polyline({
+                        hasZ: false,
+                        hasM: false,
+                        paths: railwayPath,
+                        spatialReference: {wkid: 4326}
+                    });
+
+                    var lineGraphics =
+                        {
+                            geometry: railwayLine,
+                            attributes: {
+                                ObjectID: railway.id * 10,
+                                railway_name: railway.name,
+                                railway_info: railway.info,
+                                railway_level: railway.level,
+                                railway_url: railway.url
+                            }
+                        };
+                    lineFeatures.push(lineGraphics);
+//                    console.log(lineFeatures);
+                    return lineFeatures;
+                });
+            }
+```
+#### 创建属性, 渲染样式
+
+这里加一句, `polyline` 好像是不支持 `popup` 的
+也就是说, 在图上的线是无法点击之后弹出信息的,
+这里是个坑, 慢慢解决
+
+这里说一下, 我在字段里给高铁线给了一个`level`,用于记录铁路的速度,比如京沪高铁350Km/H, 兰新高铁 210Km/h
+按照不同的速度等级, 渲染出来的铁路颜色不同
+
+> 在 `render` 里面有一个  `visualVariables` 用于控制符号的大小颜色等等
+
+
+```
+                visualVariables: [
+                    {
+                        // 按颜色进行分类
+                        type: "color",
+                        // 选择要进行分类的字段
+                        field: "railway_level",
+                        // 根据字段值进行划分
+                        stops: [
+                            {value: 250, color: "#edcc50"},
+                            {value: 300, color: "#ea6838"},
+                            {value: 350, color: "#e51806"}
+                        ]
+                    }
+                ]
+```
+
+```javascript
+//            铁路线符号样式
+            var railway_line_symbol = {
+                type: "simple-line",
+                style: "short-dash-dot",
+                join: "bevel",
+                miterLimit: 0,
+                width: 4,
+                color: [92, 92, 92, 1]
+            };
+
+
+//            铁路符号渲染
+            var railwayRender = {
+                type: "simple",
+                symbol: railway_line_symbol,
+
+                // 可视变量
+                visualVariables: [
+                    {
+                        // 按颜色进行分类
+                        type: "color",
+                        // 选择要进行分类的字段
+                        field: "railway_level",
+                        // 根据字段值进行划分
+                        stops: [
+                            {value: 250, color: "#edcc50"},
+                            {value: 300, color: "#ea6838"},
+                            {value: 350, color: "#e51806"}
+                        ]
+                    }
+                ]
+            };
+
+            // 铁路属性字段
+            var railwayFields = [
+                {
+                    name: "ObjectID",
+                    alias: "ObjectID",
+                    type: "oid"
+                }, {
+                    name: "railway_name",
+                    alias: "railway_name",
+                    type: "string"
+                }, {
+                    name: "railway_info",
+                    alias: "railway_info",
+                    type: "string"
+                }, {
+                    name: "railway_level",
+                    alias: "railway_level",
+                    type: "string"
+                }
+            ];
+```
+#### 创建铁路图层
+```javascript
+        // 创建铁路图层
+            var railway_lyr;
+            function createRailwayLayer() {
+                railway_lyr = new FeatureLayer({
+                    // 上个函数中的graphics
+                    source: lineFeatures,
+                    fields: railwayFields,
+                    renderer: railwayRender,
+//                    目前 polyline好像不支持 popup
+//                    popupTemplate: railwayLineTemplate,
+                    objectIdField: "ObjectID",
+                    geometryType: "polyline"
+                });
+                console.log(railway_lyr);
+                map.add(railway_lyr);
+            }
+
+```
+
+#### 添加好的效果
+
+![image](https://ws2.sinaimg.cn/large/6d4d992ely1fmdwi2ysx1j20zn0s87wh.jpg)
